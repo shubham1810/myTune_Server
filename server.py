@@ -1,7 +1,8 @@
 import copy
-from flask import Flask, request
+from flask import Flask, request, url_for, send_file
 import json
 import apiclient
+import os
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -12,7 +13,7 @@ DEVELOPER_KEY = 'AIzaSyBcYKu5TcSDF9yxQEmydlN1Ax9BMb0jmxk'
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 app.config['SECRET_KEY'] = 'mylatestserver'
 
@@ -86,8 +87,33 @@ def search():
 
 @app.route('/api/download', methods=['GET'])
 def download():
-    return "Nothing for now"
+    try:
+        os.system('youtube-dl https://www.youtube.com/watch?v=' + str(request.args.get('id') + ' -o "./static/%(title)s.%(ext)s" --extract-audio --audio-format mp3'))
+        name = request.args.get('name')
+        id_file = request.args.get('id')
+        print "Downloaded and sent to the client"
+        return json.dumps({"url": "http://localhost:8080/api/download/music?id="+str(id_file)+"&name="+ str(name)})
 
+    except:
+        name = request.args.get('name')
+        print name
+        id_file = request.args.get('id')
+        print "sent"
+        return json.dumps({"url": "http://localhost:8080/api/download/music?id="+str(id_file)+"&name="+ str(name)})
+
+
+@app.route('/api/download/music', methods=['GET'])
+def downloadMusic():
+    try:
+        name = request.args.get('name')
+        #print name
+        id_file = request.args.get('id')
+        print "sent"
+        return send_file('static/'+str(name)+'.mp3', mimetype='audio/mp3')
+    except:
+        #os.system('youtube-dl https://www.youtube.com/watch?v=' + str(request.args.get('id') + ' -o "./static/%(title)s.%(ext)s" --extract-audio --audio-format mp3'))
+        name = request.args.get('name')
+        return send_file('static/'+str(name)+'.mp3', mimetype='audio/mp3')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)
