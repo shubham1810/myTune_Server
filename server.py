@@ -5,8 +5,8 @@ import apiclient
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
-from oauth2client.tools import argparser
-
+#from oauth2client.tools import argparser
+import argparse
 
 DEVELOPER_KEY = 'AIzaSyBcYKu5TcSDF9yxQEmydlN1Ax9BMb0jmxk'
 YOUTUBE_API_SERVICE_NAME = 'youtube'
@@ -51,9 +51,10 @@ def youtube_search(options):
 
 
 def run(query='None'):
-    argparser.add_argument("--q", help="Search term", default=query)
-    argparser.add_argument("--max-results", help="Max results", default=25)
-    args = argparser.parse_args()
+    parse = argparse.ArgumentParser()
+    parse.add_argument("--q", help="Search term", default=query)
+    parse.add_argument("--max-results", help="Max results", default=25)
+    args = parse.parse_args()
 
     try:
         return youtube_search(args)
@@ -83,9 +84,9 @@ def search():
     return run(query=str(request.args.get('query')))
 
 
-@app.route('/users/shubham')
-def user():
-    return json.dumps(some)
+@app.route('/api/download', methods=['GET'])
+def download():
+    return "Nothing for now"
 
 
 if __name__ == '__main__':
